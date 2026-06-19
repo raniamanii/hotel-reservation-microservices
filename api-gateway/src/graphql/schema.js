@@ -9,7 +9,7 @@ const typeDefs = `#graphql
     id: String
     numero: Int
     type: String
-    prix: Float
+    prix: Float 
     disponible: Boolean
   }
 
@@ -143,3 +143,11 @@ async function createGraphQLMiddleware() {
 }
 
 module.exports = { createGraphQLMiddleware };
+
+//Ce module implémente un serveur GraphQL 
+// basé sur Apollo Server
+//  dans l’API Gateway. Il permet aux clients de récupérer ou modifier
+//  des données de manière flexible.
+//  Les resolvers traduisent
+//  les requêtes GraphQL en appels gRPC vers
+//  les microservices.

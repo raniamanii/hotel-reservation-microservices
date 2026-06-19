@@ -64,3 +64,9 @@ module.exports = {
     markAsRead: promisify(notifClient, 'MarkAsRead')
   }
 };
+
+
+
+//Ce module implémente des clients gRPC dans l’API Gateway.
+//  Il charge les fichiers .proto et permet de communiquer avec les microservices 
+// via des appels gRP
