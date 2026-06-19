@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package hotel;
+
+service HotelService {
+  rpc GetHotels (Empty) returns (HotelList);
+  rpc GetHotelById (HotelId) returns (Hotel);
+  rpc AddHotel (HotelRequest) returns (Hotel);
+  rpc CheckAvailability (AvailabilityRequest) returns (AvailabilityResponse);
+  rpc UpdateChambreDisponibilite (UpdateDispoRequest) returns (StatusResponse);
+}
+
+message Empty {}
+
+message HotelId {
+  string id = 1;
+}
+
+message Hotel {
+  string id = 1;
+  string nom = 2;
+  string ville = 3;
+  string adresse = 4;
+  int32 etoiles = 5;
+  repeated Chambre chambres = 6;
+}
+
+message Chambre {
+  string id = 1;
+  int32 numero = 2;
+  string type = 3;
+  double prix = 4;
+  bool disponible = 5;
+}
+
+message HotelList {
+  repeated Hotel hotels = 1;
+}
+
+message HotelRequest {
+  string nom = 1;
+  string ville = 2;
+  string adresse = 3;
+  int32 etoiles = 4;
+}
+
+message AvailabilityRequest {
+  string hotelId = 1;
+  string dateArrivee = 2;
+  string dateDepart = 3;
+}
+
+message AvailabilityResponse {
+  bool disponible = 1;
+  repeated Chambre chambresDisponibles = 2;
+}
+
+message UpdateDispoRequest {
+  string chambreId = 1;
+  bool disponible = 2;
+}
+
+message StatusResponse {
+  bool succes = 1;
+  string message = 2;
+}

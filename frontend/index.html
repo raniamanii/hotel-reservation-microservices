@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Reservation Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap');
+
+  :root {
+    --bg: #F7F6F2;
+    --surface: #FFFFFF;
+    --border: #E8E4DC;
+    --text: #1A1714;
+    --text-muted: #6B6560;
+    --accent: #1B4F72;
+    --accent-light: #EBF2F8;
+    --gold: #C9963A;
+    --green: #27664A;
+    --green-light: #E8F4ED;
+    --red: #8B2A2A;
+    --red-light: #FAECEC;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--accent);
+    color: white;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.02em;
+  }
+  .logo span { color: #C9963A; }
+  .status-bar { display: flex; gap: 12px; align-items: center; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #4CAF50; display: inline-block;
+    box-shadow: 0 0 0 3px rgba(76,175,80,0.3);
+  }
+  .status-text { font-size: 13px; color: rgba(255,255,255,0.8); }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* TABS */
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 1.5rem;
+    width: fit-content;
+  }
+  .tab {
+    padding: 8px 20px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: var(--shadow);
+  }
+  .tab:hover:not(.active) { background: var(--bg); color: var(--text); }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* CARDS GRID */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; }
+
+  /* HOTEL CARD */
+  .hotel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .hotel-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .hotel-card-header {
+    background: linear-gradient(135deg, var(--accent) 0%, #2C6E9B 100%);
+    padding: 16px 18px;
+    color: white;
+  }
+  .hotel-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 4px; }
+  .hotel-ville { font-size: 13px; opacity: 0.85; }
+  .hotel-stars { color: var(--gold); font-size: 14px; margin-top: 6px; }
+  .hotel-body { padding: 14px 18px; }
+  .chambres-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .chambre-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    background: var(--bg);
+    font-size: 13px;
+  }
+  .chambre-item.indispo { opacity: 0.5; }
+  .chambre-type { font-weight: 500; }
+  .chambre-prix { color: var(--gold); font-weight: 600; }
+  .chambre-dispo {
+    font-size: 11px; padding: 2px 7px; border-radius: 20px;
+    font-weight: 500;
+  }
+  .dispo-ok { background: var(--green-light); color: var(--green); }
+  .dispo-non { background: var(--red-light); color: var(--red); }
+  .btn-reserver {
+    display: block; width: 100%; margin-top: 12px;
+    padding: 9px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s;
+  }
+  .btn-reserver:hover { background: #163F5C; }
+
+  /* FORM */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    max-width: 520px;
+    box-shadow: var(--shadow);
+  }
+  .form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    margin-bottom: 1.2rem;
+    color: var(--accent);
+  }
+  .form-group { margin-bottom: 1rem; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; }
+  input, select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: white;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn-submit {
+    width: 100%; padding: 11px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    margin-top: 4px;
+    transition: background 0.2s;
+  }
+  .btn-submit:hover { background: #163F5C; }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* RESERVATION CARDS */
+  .resa-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .resa-info { flex: 1; }
+  .resa-nom { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .resa-detail { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+  .resa-statut {
+    font-size: 12px; font-weight: 600; padding: 4px 10px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .statut-ok { background: var(--green-light); color: var(--green); }
+  .statut-annulee { background: var(--red-light); color: var(--red); }
+  .btn-annuler {
+    padding: 6px 14px;
+    background: var(--red-light);
+    color: var(--red);
+    border: 1px solid #E8BFBF;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    margin-top: 6px;
+  }
+  .btn-annuler:hover { background: var(--red); color: white; }
+
+  /* NOTIFICATIONS */
+  .notif-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .notif-card.lu { border-left-color: var(--border); opacity: 0.6; }
+  .notif-msg { font-size: 14px; line-height: 1.5; flex: 1; }
+  .notif-type {
+    font-size: 11px; font-weight: 600; padding: 3px 8px;
+    border-radius: 20px; margin-bottom: 4px; display: inline-block;
+  }
+  .type-confirmee { background: var(--green-light); color: var(--green); }
+  .type-annulee { background: var(--red-light); color: var(--red); }
+  .notif-date { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .btn-lire {
+    padding: 5px 12px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border: 1px solid #C5DAF0;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+  }
+  .btn-lire:hover { background: var(--accent); color: white; }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-text { font-size: 15px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    z-index: 999;
+    transform: translateX(120%);
+    transition: transform 0.3s;
+    max-width: 320px;
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.success { background: var(--green); }
+  .toast.error { background: var(--red); }
+
+  /* MODAL */
+  .modal-bg {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    width: 90%; max-width: 480px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .modal-hotel { font-size: 14px; color: var(--text-muted); margin-bottom: 1rem; padding: 10px; background: var(--bg); border-radius: 6px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1rem; }
+  .btn-cancel-modal {
+    padding: 8px 16px; border: 1px solid var(--border); background: transparent;
+    border-radius: 6px; font-size: 14px; cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .btn-confirm {
+    padding: 8px 16px; background: var(--accent); color: white;
+    border: none; border-radius: 6px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--accent); }
+  .btn-refresh {
+    padding: 7px 14px; border: 1px solid var(--border);
+    background: var(--surface); border-radius: 7px;
+    font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif;
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .btn-refresh:hover { border-color: var(--accent); color: var(--accent); }
+
+  .loading { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 14px; }
+  .user-id-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .user-id-input {
+    flex: 1; padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: 7px; font-size: 14px; font-family: 'Inter', sans-serif;
+    background: var(--bg);
+  }
+  .btn-search {
+    padding: 8px 16px; background: var(--accent); color: white;
+    border: none; border-radius: 7px; font-size: 14px;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🏨 Hotel <span>Reservation</span></div>
+  <div class="status-bar">
+    <span class="status-dot" id="status-dot"></span>
+    <span class="status-text" id="status-text">Connexion...</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('hotels')">🏨 Hôtels</button>
+    <button class="tab" onclick="switchTab('reserver')">📅 Réserver</button>
+    <button class="tab" onclick="switchTab('reservations')">📋 Mes Réservations</button>
+    <button class="tab" onclick="switchTab('notifications')">🔔 Notifications</button>
+  </div>
+
+  <!-- PANEL HOTELS -->
+  <div class="panel active" id="panel-hotels">
+    <div class="section-header">
+      <div class="section-title">Hôtels disponibles</div>
+      <button class="btn-refresh" onclick="loadHotels()">↻ Actualiser</button>
+    </div>
+    <div id="hotels-list" class="grid">
+      <div class="loading">Chargement des hôtels...</div>
+    </div>
+  </div>
+
+  <!-- PANEL RESERVER -->
+  <div class="panel" id="panel-reserver">
+    <div class="form-card">
+      <div class="form-title">Nouvelle réservation</div>
+      <div class="form-group">
+        <label>Hôtel</label>
+        <select id="select-hotel" onchange="loadChambres()">
+          <option value="">-- Choisir un hôtel --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Chambre</label>
+        <select id="select-chambre">
+          <option value="">-- Choisir une chambre --</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date d'arrivée</label>
+          <input type="date" id="date-arrivee">
+        </div>
+        <div class="form-group">
+          <label>Date de départ</label>
+          <input type="date" id="date-depart">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Nom complet</label>
+        <input type="text" id="nom-client" placeholder="Ahmed Ben Ali">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email-client" placeholder="ahmed@email.com">
+      </div>
+      <div class="form-group">
+        <label>ID Utilisateur</label>
+        <input type="text" id="user-id-form" placeholder="user-001" value="user-001">
+      </div>
+      <button class="btn-submit" onclick="creerReservation()">Confirmer la réservation</button>
+    </div>
+  </div>
+
+  <!-- PANEL RESERVATIONS -->
+  <div class="panel" id="panel-reservations">
+    <div class="section-header">
+      <div class="section-title">Réservations</div>
+      <button class="btn-refresh" onclick="loadReservations()">↻ Actualiser</button>
+    </div>
+    <div class="user-id-row">
+      <input class="user-id-input" type="text" id="search-user-id" placeholder="Filtrer par ID utilisateur (ex: user-001)">
+      <button class="btn-search" onclick="loadReservations()">Rechercher</button>
+      <button class="btn-search" style="background:var(--text-muted)" onclick="document.getElementById('search-user-id').value='';loadReservations()">Tout voir</button>
+    </div>
+    <div id="reservations-list" style="display:flex;flex-direction:column;gap:10px">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <!-- PANEL NOTIFICATIONS -->
+  <div class="panel" id="panel-notifications">
+    <div class="section-header">
+      <div class="section-title">Notifications</div>
+      <button class="btn-refresh" onclick="loadNotifications()">↻ Actualiser</button>
+    </div>
+    <div id="notifications-list" style="display:flex;flex-direction:column;gap:10px">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL RESERVATION RAPIDE -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <div class="modal-title">Réserver rapidement</div>
+    <div class="modal-hotel" id="modal-hotel-info"></div>
+    <div class="form-group">
+      <label>Chambre</label>
+      <select id="modal-chambre"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date d'arrivée</label>
+        <input type="date" id="modal-arrivee">
+      </div>
+      <div class="form-group">
+        <label>Date de départ</label>
+        <input type="date" id="modal-depart">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Nom complet</label>
+      <input type="text" id="modal-nom" placeholder="Ahmed Ben Ali">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="modal-email" placeholder="ahmed@email.com">
+    </div>
+    <div class="form-group">
+      <label>ID Utilisateur</label>
+      <input type="text" id="modal-userid" value="user-001">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel-modal" onclick="closeModal()">Annuler</button>
+      <button class="btn-confirm" onclick="confirmerModalReservation()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://localhost:3000/api';
+let hotelsData = [];
+let currentHotelModal = null;
+
+// ===== UTILS =====
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function stars(n) {
+  return '★'.repeat(n) + '☆'.repeat(5 - n);
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('fr-FR');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['hotels','reserver','reservations','notifications'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'hotels') loadHotels();
+  if (name === 'reservations') loadReservations();
+  if (name === 'notifications') loadNotifications();
+}
+
+// ===== HEALTH CHECK =====
+async function checkHealth() {
+  try {
+    const r = await fetch('http://localhost:3000/health');
+    if (r.ok) {
+      document.getElementById('status-dot').style.background = '#4CAF50';
+      document.getElementById('status-text').textContent = 'API connectée';
+    }
+  } catch {
+    document.getElementById('status-dot').style.background = '#E53935';
+    document.getElementById('status-text').textContent = 'API hors ligne';
+  }
+}
+
+// ===== HOTELS =====
+async function loadHotels() {
+  document.getElementById('hotels-list').innerHTML = '<div class="loading">Chargement...</div>';
+  try {
+    const r = await fetch(API + '/hotels');
+    const data = await r.json();
+    hotelsData = data.data || [];
+    renderHotels(hotelsData);
+    populateHotelSelect();
+  } catch (e) {
+    document.getElementById('hotels-list').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Impossible de charger les hôtels.<br>Vérifie que le serveur tourne.</div></div>';
+  }
+}
+
+function renderHotels(hotels) {
+  if (!hotels.length) {
+    document.getElementById('hotels-list').innerHTML = '<div class="empty"><div class="empty-icon">🏨</div><div class="empty-text">Aucun hôtel disponible.</div></div>';
+    return;
+  }
+  document.getElementById('hotels-list').innerHTML = hotels.map(h => `
+    <div class="hotel-card">
+      <div class="hotel-card-header">
+        <div class="hotel-name">${h.nom}</div>
+        <div class="hotel-ville">📍 ${h.ville} — ${h.adresse}</div>
+        <div class="hotel-stars">${stars(h.etoiles)}</div>
+      </div>
+      <div class="hotel-body">
+        <div class="chambres-title">Chambres disponibles</div>
+        ${(h.chambres || []).map(c => `
+          <div class="chambre-item ${c.disponible ? '' : 'indispo'}">
+            <span class="chambre-type">N°${c.numero} — ${c.type}</span>
+            <span class="chambre-prix">${c.prix} DT/nuit</span>
+            <span class="chambre-dispo ${c.disponible ? 'dispo-ok' : 'dispo-non'}">${c.disponible ? 'Libre' : 'Occupée'}</span>
+          </div>
+        `).join('')}
+        <button class="btn-reserver" onclick="openModal('${h.id}')">Réserver cet hôtel</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function populateHotelSelect() {
+  const sel = document.getElementById('select-hotel');
+  sel.innerHTML = '<option value="">-- Choisir un hôtel --</option>' +
+    hotelsData.map(h => `<option value="${h.id}">${h.nom} — ${h.ville}</option>`).join('');
+}
+
+function loadChambres() {
+  const hotelId = document.getElementById('select-hotel').value;
+  const hotel = hotelsData.find(h => h.id === hotelId);
+  const sel = document.getElementById('select-chambre');
+  if (!hotel) { sel.innerHTML = '<option value="">-- Choisir une chambre --</option>'; return; }
+  sel.innerHTML = '<option value="">-- Choisir une chambre --</option>' +
+    (hotel.chambres || []).filter(c => c.disponible).map(c =>
+      `<option value="${c.id}">N°${c.numero} — ${c.type} — ${c.prix} DT/nuit</option>`
+    ).join('');
+}
+
+// ===== MODAL RESERVATION =====
+function openModal(hotelId) {
+  const hotel = hotelsData.find(h => h.id === hotelId);
+  if (!hotel) return;
+  currentHotelModal = hotel;
+  document.getElementById('modal-hotel-info').innerHTML = `<strong>${hotel.nom}</strong> — ${hotel.ville} ${'★'.repeat(hotel.etoiles)}`;
+  const sel = document.getElementById('modal-chambre');
+  sel.innerHTML = (hotel.chambres || []).filter(c => c.disponible).map(c =>
+    `<option value="${c.id}">N°${c.numero} — ${c.type} — ${c.prix} DT/nuit</option>`
+  ).join('');
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+  currentHotelModal = null;
+}
+
+async function confirmerModalReservation() {
+  const body = {
+    userId: document.getElementById('modal-userid').value,
+    hotelId: currentHotelModal.id,
+    chambreId: document.getElementById('modal-chambre').value,
+    dateArrivee: document.getElementById('modal-arrivee').value,
+    dateDepart: document.getElementById('modal-depart').value,
+    nomClient: document.getElementById('modal-nom').value,
+    emailClient: document.getElementById('modal-email').value,
+  };
+  if (!body.chambreId || !body.dateArrivee || !body.dateDepart || !body.nomClient || !body.emailClient) {
+    showToast('Merci de remplir tous les champs.', 'error'); return;
+  }
+  try {
+    const r = await fetch(API + '/reservations', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await r.json();
+    if (data.succes) {
+      showToast('✅ Réservation confirmée !');
+      closeModal();
+      loadHotels();
+    } else {
+      showToast('Erreur : ' + data.message, 'error');
+    }
+  } catch (e) {
+    showToast('Erreur de connexion.', 'error');
+  }
+}
+
+// ===== RESERVATION FORM =====
+async function creerReservation() {
+  const body = {
+    userId: document.getElementById('user-id-form').value || 'user-001',
+    hotelId: document.getElementById('select-hotel').value,
+    chambreId: document.getElementById('select-chambre').value,
+    dateArrivee: document.getElementById('date-arrivee').value,
+    dateDepart: document.getElementById('date-depart').value,
+    nomClient: document.getElementById('nom-client').value,
+    emailClient: document.getElementById('email-client').value,
+  };
+  if (!body.hotelId || !body.chambreId || !body.dateArrivee || !body.dateDepart || !body.nomClient || !body.emailClient) {
+    showToast('Merci de remplir tous les champs.', 'error'); return;
+  }
+  const btn = document.querySelector('#panel-reserver .btn-submit');
+  btn.disabled = true; btn.textContent = 'Envoi en cours...';
+  try {
+    const r = await fetch(API + '/reservations', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await r.json();
+    if (data.succes) {
+      showToast('✅ Réservation confirmée !');
+      switchTab('reservations');
+    } else {
+      showToast('Erreur : ' + data.message, 'error');
+    }
+  } catch (e) {
+    showToast('Erreur de connexion.', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Confirmer la réservation';
+  }
+}
+
+// ===== RESERVATIONS =====
+async function loadReservations() {
+  const userId = document.getElementById('search-user-id').value.trim();
+  const url = userId ? `${API}/reservations/user/${userId}` : `${API}/reservations`;
+  document.getElementById('reservations-list').innerHTML = '<div class="loading">Chargement...</div>';
+  try {
+    const r = await fetch(url);
+    const data = await r.json();
+    const list = data.data || [];
+    if (!list.length) {
+      document.getElementById('reservations-list').innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Aucune réservation trouvée.</div></div>';
+      return;
+    }
+    document.getElementById('reservations-list').innerHTML = list.map(res => `
+      <div class="resa-card">
+        <div class="resa-info">
+          <div class="resa-nom">${res.nomClient}</div>
+          <div class="resa-detail">
+            📧 ${res.emailClient}<br>
+            🏨 Hôtel ID: ${res.hotelId.substring(0,8)}...<br>
+            📅 Du ${formatDate(res.dateArrivee)} au ${formatDate(res.dateDepart)}<br>
+            🕐 Créé le ${formatDate(res.dateCreation)}
+          </div>
+          ${res.statut !== 'ANNULEE' ? `<button class="btn-annuler" onclick="annulerReservation('${res.id}')">Annuler</button>` : ''}
+        </div>
+        <span class="resa-statut ${res.statut === 'CONFIRMEE' ? 'statut-ok' : 'statut-annulee'}">${res.statut}</span>
+      </div>
+    `).join('');
+  } catch (e) {
+    document.getElementById('reservations-list').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Erreur de chargement.</div></div>';
+  }
+}
+
+async function annulerReservation(id) {
+  if (!confirm('Confirmer l\'annulation de cette réservation ?')) return;
+  try {
+    const r = await fetch(`${API}/reservations/${id}`, { method: 'DELETE' });
+    const data = await r.json();
+    if (data.succes) {
+      showToast('Réservation annulée.');
+      loadReservations();
+    } else {
+      showToast('Erreur : ' + data.message, 'error');
+    }
+  } catch (e) {
+    showToast('Erreur de connexion.', 'error');
+  }
+}
+
+// ===== NOTIFICATIONS =====
+async function loadNotifications() {
+  document.getElementById('notifications-list').innerHTML = '<div class="loading">Chargement...</div>';
+  try {
+    const r = await fetch(API + '/notifications');
+    const data = await r.json();
+    const list = data.data || [];
+    if (!list.length) {
+      document.getElementById('notifications-list').innerHTML = '<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">Aucune notification.</div></div>';
+      return;
+    }
+    document.getElementById('notifications-list').innerHTML = list.map(n => `
+      <div class="notif-card ${n.lu ? 'lu' : ''}">
+        <div class="notif-msg">
+          <span class="notif-type ${n.type === 'RESERVATION_CONFIRMEE' ? 'type-confirmee' : 'type-annulee'}">${n.type === 'RESERVATION_CONFIRMEE' ? '✅ Confirmée' : '❌ Annulée'}</span><br>
+          ${n.message}
+          <div class="notif-date">🕐 ${formatDate(n.dateCreation)}</div>
+        </div>
+        ${!n.lu ? `<button class="btn-lire" onclick="marquerLue('${n.id}')">Marquer lue</button>` : '<span style="font-size:12px;color:var(--text-muted)">Lu</span>'}
+      </div>
+    `).join('');
+  } catch (e) {
+    document.getElementById('notifications-list').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Erreur de chargement.</div></div>';
+  }
+}
+
+async function marquerLue(id) {
+  try {
+    await fetch(`${API}/notifications/${id}/lire`, { method: 'PATCH' });
+    loadNotifications();
+  } catch (e) {
+    showToast('Erreur.', 'error');
+  }
+}
+
+// ===== INIT =====
+checkHealth();
+setInterval(checkHealth, 10000);
+loadHotels();
+</script>
+</body>
+</html>
